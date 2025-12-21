@@ -1,0 +1,12 @@
+releases:
+  - name: aws-load-balancer-controller
+    namespace: kube-system
+    chart: aws.github.io/eks-charts/aws-load-balancer-controller
+    version: "1.8.0"
+    values:
+      - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" }}
+      - serviceAccount:
+          create: true
+          name: aws-load-balancer-controller
+          annotations:
+            eks.amazonaws.com/role-arn: {{ requiredEnv "ALB_IRSA_ROLE_ARN" }}

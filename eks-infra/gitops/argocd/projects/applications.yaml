@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: applications
+  namespace: argocd
+spec:
+  description: Application deployments
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: production
+  - namespace: staging
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

@@ -1,0 +1,35 @@
+adminPassword: "changeit123!"
+
+persistence:
+  enabled: true
+  storageClassName: gp3
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi
+
+ingress:
+  enabled: true
+  ingressClassName: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  hosts:
+    - grafana.example.com
+  path: /
+
+grafana.ini:
+  auth.anonymous:
+    enabled: false
+    org_role: Viewer
+  log:
+    level: info
+
+sidecar:
+  datasources:
+    enabled: true
+    defaultDatasourceEnabled: true
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    folder: /tmp/dashboards
+    searchNamespace: monitoring

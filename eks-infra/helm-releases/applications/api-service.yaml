@@ -1,0 +1,13 @@
+releases:
+  - name: api-service
+    namespace: production
+    chart: ../../helm-charts/microservice
+    values:
+      - image:
+          repository: your-registry/api-service
+          tag: "v1.2.3"
+      - config:
+          DATABASE_URL: "postgres://..."
+          LOG_LEVEL: info
+      - service:
+          port: 8080

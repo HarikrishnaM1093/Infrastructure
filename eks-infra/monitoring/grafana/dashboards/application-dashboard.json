@@ -1,0 +1,30 @@
+{
+    "dashboard": {
+      "title": "Nginx Application Dashboard",
+      "panels": [
+        {
+          "title": "HTTP Requests Rate",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "rate(nginx_http_requests_total[5m])",
+              "legendFormat": "{{status}}"
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+        },
+        {
+          "title": "Error Rate (%)",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "rate(nginx_http_requests_total{status=~\"5..\"}[5m]) / rate(nginx_http_requests_total[5m]) * 100",
+              "legendFormat": "Errors"
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+        }
+      ]
+    }
+  }
+  

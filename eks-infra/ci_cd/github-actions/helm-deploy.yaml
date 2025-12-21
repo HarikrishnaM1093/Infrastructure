@@ -1,0 +1,73 @@
+name: Helm Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'helm-charts/**'
+      - 'helm-releases/**'
+      - 'kubernetes/**'
+
+env:
+  AWS_REGION: 'us-east-1'
+
+jobs:
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.EKS_DEPLOY_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: 'v1.32.0'
+    
+    - name: Setup Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: 'v3.14.0'
+    
+    - name: Setup helmfile
+      run: |
+        curl -LO https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64
+        chmod +x helmfile_linux_amd64
+        sudo mv helmfile_linux_amd64 /usr/local/bin/helmfile
+    
+    - name: Get cluster name
+      id: cluster
+      run: |
+        CLUSTER_NAME=$(cd terraform/environments/production && terraform output -raw cluster_name)
+        echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+    
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name ${{ steps.cluster.outputs.cluster_name }} --region ${{ env.AWS_REGION }}
+    
+    - name: Lint Helm charts
+      run: |
+        helm lint helm-charts/application/
+        helm template app helm-charts/application/ --values helm-charts/application/values-production.yaml
+    
+    - name: Deploy Infrastructure
+      run: helmfile -f helm-releases/infrastructure/ apply
+    
+    - name: Deploy Monitoring
+      run: helmfile -f helm-releases/monitoring/ apply
+    
+    - name: Deploy Applications
+      run: helmfile -f helm-releases/applications/ apply
+    
+    - name: Verify deployments
+      run: |
+        kubectl rollout status deployment/nginx-app -n production --timeout=300s
+        kubectl get ingress -n production

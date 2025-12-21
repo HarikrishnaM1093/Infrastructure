@@ -1,0 +1,72 @@
+pipeline {
+    agent any
+    environment {
+        AWS_REGION = 'us-east-1'
+        TF_VERSION = '1.7.0'
+    }
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'staging', 'production'],
+            description: 'Target environment'
+        )
+        choice(
+            name: 'ACTION',
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Terraform action'
+        )
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Terraform Init') {
+            steps {
+                dir("terraform/environments/${params.ENVIRONMENT}") {
+                    sh "terraform init -upgrade"
+                }
+            }
+        }
+        stage('Terraform Plan') {
+            when { expression { params.ACTION == 'plan' || params.ACTION == 'apply' } }
+            steps {
+                dir("terraform/environments/${params.ENVIRONMENT}") {
+                    sh "terraform plan -out=tfplan"
+                }
+            }
+        }
+        stage('Terraform Apply') {
+            when { expression { params.ACTION == 'apply' } }
+            input {
+                message "Apply to ${params.ENVIRONMENT}?"
+                ok "Deploy"
+            }
+            steps {
+                dir("terraform/environments/${params.ENVIRONMENT}") {
+                    sh "terraform apply -auto-approve tfplan"
+                }
+            }
+        }
+        stage('Terraform Destroy') {
+            when { expression { params.ACTION == 'destroy' } }
+            input {
+                message "Destroy ${params.ENVIRONMENT}?"
+                ok "Destroy"
+            }
+            steps {
+                dir("terraform/environments/${params.ENVIRONMENT}") {
+                    sh "terraform destroy -auto-approve"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            dir("terraform/environments/${params.ENVIRONMENT}") {
+                archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
+            }
+        }
+    }
+}

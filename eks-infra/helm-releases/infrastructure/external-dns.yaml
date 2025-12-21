@@ -1,0 +1,14 @@
+releases:
+  - name: external-dns
+    namespace: kube-system
+    chart: kubernetes-sigs.github.io/external-dns/external-dns
+    version: "1.14.3"
+    values:
+      - provider: aws
+      - policy: sync
+      - txtOwnerId: {{ requiredEnv "EKS_CLUSTER_NAME" }}
+      - serviceAccount:
+          create: true
+          name: external-dns
+          annotations:
+            eks.amazonaws.com/role-arn: {{ requiredEnv "EXTERNAL_DNS_IRSA_ROLE_ARN" }}

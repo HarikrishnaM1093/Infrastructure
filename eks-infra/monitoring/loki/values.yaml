@@ -1,0 +1,23 @@
+loki:
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 100Gi
+  config:
+    schema_config:
+      configs:
+      - from: 2020-10-24
+        store: boltdb-shipper
+        object_store: s3
+        schema: v11
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /data/loki/boltdb-shipper-active
+        cache_location: /data/loki/boltdb-shipper-cache
+        shared_store: s3
+
+promtail:
+  enabled: true
+  config:
+    clients:
+    - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push

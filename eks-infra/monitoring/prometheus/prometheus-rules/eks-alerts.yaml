@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: eks-alerts
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  groups:
+  - name: eks-cluster
+    rules:
+    - alert: EKSNodeNotReady
+      expr: kube_node_status_condition{condition="Ready"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        team: infrastructure
+      annotations:
+        summary: "Node {{ $labels.node }} is not ready"
+        description: "Node {{ $labels.node }} has been unready for more than 5 minutes"
+    
+    - alert: EKSPodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[5m]) > 0
+      for: 2m
+      labels:
+        severity: warning
+        team: applications
+      annotations:
+        summary: "Pod {{ $labels.pod }} in {{ $labels.namespace }} is crash looping"
+        description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is restarting"
+    
+    - alert: EKSClusterNotReachable
+      expr: up{job="kubernetes-apiserver"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        team: infrastructure
+      annotations:
+        summary: "Kubernetes API server is not reachable"

@@ -1,0 +1,17 @@
+type: metric alert
+name: Pod Crash Looping
+query: "avg(last_5m):sum:kubernetes.pods.restarts{eks-cluster:eks-prod*} by {pod_name,kube_namespace} > 3"
+message: |
+  Pod {{kube_namespace}}.{{pod_name}} is restarting frequently
+  
+  Check: kubectl logs {{pod_name}} -n {{kube_namespace}}
+  
+  @slack-devops
+tags:
+- "team:applications"
+options:
+  threshold_filters:
+    - metric: kubernetes.pods.restarts
+      operator: ">"
+      threshold: 3
+  evaluation_delay: 300

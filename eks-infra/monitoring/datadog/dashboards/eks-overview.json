@@ -1,0 +1,31 @@
+{
+    "title": "EKS Cluster Overview",
+    "widgets": [
+      {
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:system.cpu.user{eks-cluster:eks-prod*} by {host}",
+              "display_type": "line"
+            }
+          ],
+          "title": "Node CPU Usage"
+        }
+      },
+      {
+        "definition": {
+          "type": "query_value",
+          "requests": [
+            {
+              "q": "avg:kubernetes_statefulset_replica_missing{eks-cluster:eks-prod*}"
+            }
+          ],
+          "title": "StatefulSet Issues"
+        }
+      }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": true
+  }
+  

@@ -1,0 +1,16 @@
+releases:
+  - name: cluster-autoscaler
+    namespace: kube-system
+    chart: raw.githubusercontent.com/kubernetes/autoscaler/master/charts/cluster-autoscaler
+    version: "9.10.0"
+    values:
+      - autoDiscovery:
+          clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" }}
+      - awsRegion: {{ requiredEnv "AWS_REGION" }}
+      - cloudProvider: aws
+      - rbac:
+          serviceAccount:
+            create: true
+            name: cluster-autoscaler
+            annotations:
+              eks.amazonaws.com/role-arn: {{ requiredEnv "CLUSTER_AUTOSCALER_IRSA_ROLE_ARN" }}
