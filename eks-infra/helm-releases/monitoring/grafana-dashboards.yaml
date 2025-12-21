@@ -1,0 +1,18 @@
+releases:
+  - name: grafana-dashboards
+    namespace: monitoring
+    chart: grafana/grafana-dashboards
+    repo: https://grafana.github.io/helm-charts
+    version: "0.5.0"
+    values:
+      - defaultRules:
+          rules: loki
+      - providers:
+          - name: "eks-cluster"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /tmp/dashboards/eks-cluster-dashboard.json

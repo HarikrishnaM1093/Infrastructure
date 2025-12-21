@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    environment {
+        AWS_REGION = 'us-east-1'
+    }
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'staging', 'production'],
+            description: 'Target environment'
+        )
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Setup Tools') {
+            steps {
+                sh '''
+                curl -LO https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64
+                chmod +x helmfile_linux_amd64
+                sudo mv helmfile_linux_amd64 /usr/local/bin/helmfile
+                '''
+            }
+        }
+        stage('Get Cluster') {
+            steps {
+                script {
+                    CLUSTER_NAME = sh(
+                        script: "cd terraform/environments/${params.ENVIRONMENT} && terraform output -raw cluster_name",
+                        returnStdout: true
+                    ).trim()
+                    env.CLUSTER_NAME = CLUSTER_NAME
+                }
+            }
+        }
+        stage('Update Kubeconfig') {
+            steps {
+                sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${AWS_REGION}"
+            }
+        }
+        stage('Deploy Infrastructure') {
+            steps {
+                sh "helmfile -f helm-releases/infrastructure/ apply"
+            }
+        }
+        stage('Deploy Monitoring') {
+            steps {
+                sh "helmfile -f helm-releases/monitoring/ apply"
+            }
+        }
+        stage('Deploy Applications') {
+            steps {
+                sh "helmfile -f helm-releases/applications/ apply"
+            }
+        }
+        stage('Verify') {
+            steps {
+                sh """
+                kubectl rollout status deployment/nginx-app -n production --timeout=300s
+                kubectl get ingress -n production -o wide
+                kubectl get pods -n production -l app.kubernetes.io/name=application
+                """
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  description: Monitoring stack (Datadog, Prometheus, Grafana)
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: monitoring
+  - namespace: datadog
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

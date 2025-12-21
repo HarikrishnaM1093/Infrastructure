@@ -1,0 +1,26 @@
+replicaCount: 2
+
+ingress:
+  enabled: true
+  hosts:
+    - host: stg.app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+
+config:
+  LOG_LEVEL: info
+  APP_ENV: staging

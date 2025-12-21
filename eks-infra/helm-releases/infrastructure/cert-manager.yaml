@@ -1,0 +1,10 @@
+releases:
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    repo: https://charts.jetstack.io
+    version: "v1.15.3"
+    values:
+      - installCRDs: true
+      - replicaCount: 2

@@ -1,0 +1,27 @@
+Install helmfile first: brew install helmfile or curl -L https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64 -o /usr/local/bin/helmfile
+
+bash
+# 1. Export Terraform outputs as env vars
+export EKS_CLUSTER_NAME=$(cd terraform/environments/production && terraform output -raw cluster_name)
+export ALB_IRSA_ROLE_ARN=$(cd terraform/environments/production && terraform output -raw alb_irsa_role_arn)
+export CLUSTER_AUTOSCALER_IRSA_ROLE_ARN=$(cd terraform/environments/production && terraform output -raw cluster_autoscaler_irsa_role_arn)
+export EXTERNAL_DNS_IRSA_ROLE_ARN=$(cd terraform/environments/production && terraform output -raw external_dns_irsa_role_arn)
+export AWS_REGION=us-east-1
+
+# 2. Install infrastructure (ALB, autoscaler, etc.)
+helmfile -f helm-releases/infrastructure/ apply
+
+# 3. Install monitoring (Datadog + Prometheus)
+helmfile -f helm-releases/monitoring/ apply
+
+# 4. Deploy apps
+helmfile -f helm-releases/applications/ apply
+Datadog Setup:
+
+Sign up at datadoghq.com → get API key
+
+export DATADOG_API_KEY=your-key-here
+
+Create IRSA role for Datadog Cluster Agent (add to terraform/modules/eks-addons/datadog.tf)
+
+This gives you complete observability: Datadog (metrics/logs/traces/APM) + Prometheus (custom alerts) + Loki (logs).

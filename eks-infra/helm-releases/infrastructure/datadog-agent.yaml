@@ -1,0 +1,23 @@
+releases:
+  - name: datadog
+    namespace: datadog
+    createNamespace: true
+    chart: datadog/datadog
+    repo: https://helm.datadoghq.com
+    version: "4.12.0"
+    values:
+      - datadog:
+          apiKey: {{ requiredEnv "DATADOG_API_KEY" }}
+          site: datadoghq.com
+          logsEnabled: true
+          apmEnabled: true
+          systemProbe:
+            enabled: true
+      - datadog-operator:
+          enabled: true
+      - clusterAgent:
+          enabled: true
+          clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" }}
+          serviceAccount:
+            annotations:
+              eks.amazonaws.com/role-arn: {{ requiredEnv "DATADOG_CLUSTER_AGENT_IRSA_ROLE_ARN" }}

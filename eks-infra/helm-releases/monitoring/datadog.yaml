@@ -1,0 +1,6 @@
+releases:
+  - name: datadog-dashboards
+    namespace: datadog
+    chart: ./../helm-charts/datadog-dashboards  # Local chart later
+    values:
+      - clusterName: {{ requiredEnv "EKS_CLUSTER_NAME" }}

@@ -1,0 +1,17 @@
+type: metric alert
+name: EKS Node High CPU
+query: "avg(last_5m):avg:system.cpu.user{eks-cluster:eks-prod*} by {host} > 85"
+message: |
+  Node {{host.name}} has high CPU usage ({{value}}%)
+  
+  @slack-devops
+tags:
+- "team:infrastructure"
+options:
+  threshold_filters:
+    - metric: avg:system.cpu.user
+      operator: ">"
+      threshold: 85
+  evaluation_delay: 300
+  notify_no_data: true
+  no_data_timeframe: 10

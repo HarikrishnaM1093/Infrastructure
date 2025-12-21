@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: application-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: nginx-app
+    rules:
+    - alert: NginxHighErrorRate
+      expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) > 0.01
+      for: 2m
+      labels:
+        severity: warning
+        team: applications
+      annotations:
+        summary: "High error rate on nginx-app"
+        description: "Error rate > 1% on {{ $labels.job }} for 2 minutes"
+    
+    - alert: NginxHighLatency
+      expr: histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m])) > 1
+      for: 2m
+      labels:
+        severity: warning
+        team: applications
+      annotations:
+        summary: "High latency on nginx-app"
+        description: "95th percentile latency > 1s on {{ $labels.job }}"

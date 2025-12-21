@@ -1,0 +1,30 @@
+{
+    "title": "Nginx Application Dashboard",
+    "widgets": [
+      {
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:nginx.net.request_per_s{*} by {host}",
+              "display_type": "bars"
+            }
+          ],
+          "title": "Nginx Requests/sec"
+        }
+      },
+      {
+        "definition": {
+          "type": "query_value",
+          "requests": [
+            {
+              "q": "avg:nginx.net.response_time{*}",
+              "aggregator": "avg"
+            }
+          ],
+          "title": "Avg Response Time"
+        }
+      }
+    ]
+  }
+  

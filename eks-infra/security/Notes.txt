@@ -1,0 +1,13 @@
+# PodSecurityPolicies (if using K8s < 1.25)
+kubectl apply -k security/pod-security-policies/
+
+# NetworkPolicies
+kubectl apply -k security/network-policies/
+
+# OPA Gatekeeper (separate install)
+helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+helm install gatekeeper gatekeeper/gatekeeper \
+  --namespace gatekeeper-system --create-namespace
+
+# Apply OPA policies
+kubectl apply -f security/opa-policies/

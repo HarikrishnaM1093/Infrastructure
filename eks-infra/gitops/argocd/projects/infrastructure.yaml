@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  description: Infrastructure components (ALB, ExternalDNS, etc.)
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: kube-system
+  - namespace: cert-manager
+  - namespace: datadog
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  roles:
+  - name: admin
+    policies:
+    - p, proj:admin:infrastructure, applications, *, infra-apps/*, allow
+    groups:
+    - infra-admins

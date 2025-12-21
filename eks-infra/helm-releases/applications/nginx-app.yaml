@@ -1,0 +1,10 @@
+releases:
+  - name: nginx-app
+    namespace: production
+    chart: ../../helm-charts/application
+    values:
+      - ../../helm-charts/application/values-production.yaml
+      # Override specific values
+      - image:
+          tag: "1.27-alpine"
+      - replicaCount: 3

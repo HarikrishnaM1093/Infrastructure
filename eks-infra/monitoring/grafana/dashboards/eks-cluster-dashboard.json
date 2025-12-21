@@ -1,0 +1,37 @@
+{
+    "dashboard": {
+      "id": null,
+      "title": "EKS Cluster Overview",
+      "tags": ["eks"],
+      "timezone": "browser",
+      "panels": [
+        {
+          "title": "CPU Usage",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace!~\"kube-system\"}[5m])) by (pod)",
+              "legendFormat": "{{pod}}"
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+        },
+        {
+          "title": "Memory Usage",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(container_memory_working_set_bytes{namespace!~\"kube-system\"}) by (pod)",
+              "legendFormat": "{{pod}}"
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+        }
+      ],
+      "time": {"from": "now-6h", "to": "now"},
+      "timepicker": {},
+      "refresh": "30s"
+    },
+    "overwrite": true
+  }
+  
