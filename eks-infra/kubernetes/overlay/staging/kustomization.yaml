@@ -2,6 +2,17 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../base
+- ../../base/namespaces/
+- ../../base/rbac/ 
+- ../../base/network-policies/
 
-namePrefix: stg-
+namespace: staging
+
+patchesStrategicMerge:
+- patch-staging.yaml                    # Medium resources, staging config
+
+configMapGenerator:
+- name: staging-config
+  literals:
+  - LOG_LEVEL=info
+  - FEATURE_FLAGS=limited
