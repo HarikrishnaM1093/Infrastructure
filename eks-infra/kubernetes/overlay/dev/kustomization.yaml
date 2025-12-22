@@ -1,7 +1,22 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# 1. Import ALL base resources
 resources:
-  - ../../base
+- ../../base/namespaces/
+- ../../base/rbac/
+- ../../base/network-policies/
 
-namePrefix: dev-
+# 2. DEV-SPECIFIC tweaks
+namespace: dev                          # Apply to 'dev' namespace
+
+# 3. Patches (override base)
+patchesStrategicMerge:
+- patch-dev.yaml                        # Resource limits, debug settings
+
+# 4. ConfigMaps for dev
+configMapGenerator:
+- name: dev-config
+  literals:
+  - LOG_LEVEL=debug
+  - FEATURE_FLAGS=all

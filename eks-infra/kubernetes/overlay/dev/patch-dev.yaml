@@ -1,0 +1,18 @@
+# Dev: Low resources, debug enabled
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-app
+spec:
+  replicas: 1                          # Dev = 1 pod
+  template:
+    spec:
+      containers:
+      - name: nginx
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        env:
+        - name: DEBUG
+          value: "true"
